@@ -13,7 +13,7 @@ league = client.get_league(league_key)
 team = client.get_team(league)
 
 # Fetch roster as DataFrame (using your get_roster_dataframe method)
-df = client.get_roster_dataframe(team)
+df = client.get_roster_dataframe(team, league)
 
 # Always include a 'news' column, even if empty
 if 'editorial_player_news' in df.columns or 'notes' in df.columns:

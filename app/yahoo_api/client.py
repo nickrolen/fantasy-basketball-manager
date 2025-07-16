@@ -24,10 +24,27 @@ class YahooFantasyClient:
     def get_roster(self, team_obj):
         return team_obj.roster()
     
-    def get_roster_dataframe(self, team_obj):
+    def get_roster_dataframe(self, team_obj, league_obj):
         roster = team_obj.roster()
-        df = pd.DataFrame(roster)
-        possible_columns = ['player_id', 'name', 'status', 'eligible_positions', 'selected_position', 'editorial_player_news', 'notes']
+        rows = []
+        for player in roster:
+            player_id = player['player_id']
+            total_points = None
+            try:
+                # Get player stats for the season
+                stats = league_obj.player_stats(player_id, 'season')
+                if stats and isinstance(stats, list) and len(stats) > 0:
+                    stat_dict = stats[0]
+                    total_points = stat_dict.get('total_points')
+            except Exception as e:
+                print(f"Could not fetch stats for {player['name']}: {e}")
+            player['total_points'] = total_points
+            rows.append(player)
+        df = pd.DataFrame(rows)
+        possible_columns = [
+            'selected_position', 'name',
+            'eligible_positions', 'status', 'total_points', 'editorial_player_news', 'notes'
+        ]
         columns = [c for c in possible_columns if c in df.columns]
         return df[columns] if columns else df
     
